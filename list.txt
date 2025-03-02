@@ -1,0 +1,10 @@
+streamlit
+git+https://github.com/qubvel/segmentation_models.git
+segmentation-models
+tensorflow-addons
+tensorflow
+rasterio
+earthengine-api
+geemap
+geopandas
+cloudflared
