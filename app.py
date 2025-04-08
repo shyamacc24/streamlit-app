@@ -20,25 +20,54 @@ import gdown
 st.set_page_config(page_title="Solar Energy & Rooftop Segmentation", layout="wide")
 MAPBOX_ACCESS_TOKEN = "pk.eyJ1Ijoic2h5YW1rcmlzaG5hcCIsImEiOiJjbTdkMHgxemQwbDRzMmpzN2Y1c3NzdXhiIn0.kbMoaQQnvJzKR-T44wJvug"
 
-BACKBONE = 'resnet34'
-IMG_SIZE = (256, 256)
-NUM_CLASSES = 18
-LR = 0.0001
-
 # ---- LOAD MODEL ----
+# Set model config
+BACKBONE = 'resnet34'
+NUM_CLASSES = 4
+LR = 1e-4
+
+# Set framework and preprocessing
 sm.set_framework('tf.keras')
 preprocess_input = sm.get_preprocessing(BACKBONE)
-model = sm.Unet(BACKBONE, classes=NUM_CLASSES, activation='softmax', encoder_weights='imagenet')
-weights_path =  "https://drive.google.com/file/d/1-6QNahgN4MrXWzHwiPtIU_CfZ_2iot2b/view?usp=drive_link"
 
+# Build model architecture
+model = sm.Unet(
+    BACKBONE,
+    classes=NUM_CLASSES,
+    activation='softmax',
+    encoder_weights='imagenet'
+)
+
+# Google Drive weights URL (direct link)
+weights_url = "https://drive.google.com/uc?id=1-6QNahgN4MrXWzHwiPtIU_CfZ_2iot2b"
+weights_path = "resnet_unet_multiclass_model_4.keras"
+
+# Download weights if not already present
+import os
+import requests
+
+if not os.path.exists(weights_path):
+    with st.spinner("Downloading model weights..."):
+        response = requests.get(weights_url)
+        with open(weights_path, "wb") as f:
+            f.write(response.content)
+        st.success("Model weights downloaded successfully.")
+
+# Load weights and compile
 model.load_weights(weights_path)
-model.compile(optimizer=tf.keras.optimizers.Adam(LR), loss='categorical_crossentropy', metrics=[sm.metrics.iou_score])
+model.compile(optimizer=tf.keras.optimizers.Adam(LR),
+              loss='categorical_crossentropy',
+              metrics=[sm.metrics.iou_score])
 
 # ---- SOLAR LOCATION PLANNING ----
 st.title("Solar Location Planning & Rooftop Segmentation")
 
 st.subheader("India's Solar Potential Heatmap")
-st.image("https://drive.google.com/file/d/1ufjmjvKGIjF1qRwXcNfo9kRGLmEdEO-t/view?usp=drive_link", caption="Solar Energy Potential Across India", use_container_width=True)
+
+# Solar potential heatmap image from Google Drive
+solar_image_url = "https://drive.google.com/uc?id=1ufjmjvKGIjF1qRwXcNfo9kRGLmEdEO-t"
+st.image(solar_image_url, caption="Solar Energy Potential Across India", use_container_width=True)
+
 
 # Fetch solar irradiance data
 # NASA POWER API function
