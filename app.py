@@ -20,18 +20,24 @@ import gdown
 st.set_page_config(page_title="Solar Energy & Rooftop Segmentation", layout="wide")
 MAPBOX_ACCESS_TOKEN = "pk.eyJ1Ijoic2h5YW1rcmlzaG5hcCIsImEiOiJjbTdkMHgxemQwbDRzMmpzN2Y1c3NzdXhiIn0.kbMoaQQnvJzKR-T44wJvug"
 
+# ---- CONSTANTS ----
 BACKBONE = 'resnet34'
-NUM_CLASSES = 2
+NUM_CLASSES = 18
 LR = 0.0001
+
 MODEL_WEIGHTS_FILE = 'resnet_unet_multiclass_model_4.keras'
 MODEL_URL = "https://drive.google.com/uc?id=1-6QNahgN4MrXWzHwiPtIU_CfZ_2iot2b"
 
-# ---- DOWNLOAD MODEL WEIGHTS WITH gdown ----
+IMAGE_FILE = 'india_potential_heatmap.png'
+IMAGE_URL = "https://drive.google.com/uc?id=1ufjmjvKGIjF1qRwXcNfo9kRGLmEdEO-t"
+
+
+# ---- DOWNLOAD FUNCTIONS ----
 @st.cache_resource
-def download_model():
-    if not os.path.exists(MODEL_WEIGHTS_FILE):
-        gdown.download(MODEL_URL, MODEL_WEIGHTS_FILE, quiet=False)
-    return MODEL_WEIGHTS_FILE
+def download_file(url, output):
+    if not os.path.exists(output):
+        gdown.download(url, output, quiet=False)
+    return output
 
 # ---- LOAD MODEL ----
 def load_model():
@@ -45,7 +51,7 @@ def load_model():
         encoder_weights='imagenet'
     )
     
-    weights_path = download_model()
+    weights_path = download_file(MODEL_URL,MODEL_WEIGHTS_FILE)
     model.load_weights(weights_path)
     
     model.compile(
@@ -55,17 +61,16 @@ def load_model():
     )
     return model
 
-model = load_model()
 
-# ---- SOLAR LOCATION PLANNING ----
+# ---- INITIALIZE ----
+model = load_model()
+image_path = download_file(IMAGE_URL, IMAGE_FILE)
+
+# ---- STREAMLIT UI ----
 st.title("Solar Location Planning & Rooftop Segmentation")
 
 st.subheader("India's Solar Potential Heatmap")
-st.image(
-    "https://drive.google.com/uc?id=1ufjmjvKGIjF1qRwXcNfo9kRGLmEdEO-t", 
-    caption="Solar Energy Potential Across India", 
-    use_container_width=True
-)
+st.image(image_path, caption="Solar Energy Potential Across India", use_container_width=True)
 
 # Fetch solar irradiance data
 # NASA POWER API function
