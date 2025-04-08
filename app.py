@@ -12,6 +12,9 @@ import seaborn as sns
 from PIL import Image
 from io import BytesIO
 import pandas as pd
+import os
+import gdown
+
 
 # ---- CONFIGURATION ----
 st.set_page_config(page_title="Solar Energy & Rooftop Segmentation", layout="wide")
@@ -27,6 +30,7 @@ sm.set_framework('tf.keras')
 preprocess_input = sm.get_preprocessing(BACKBONE)
 model = sm.Unet(BACKBONE, classes=NUM_CLASSES, activation='softmax', encoder_weights='imagenet')
 weights_path =  "https://drive.google.com/file/d/1-6QNahgN4MrXWzHwiPtIU_CfZ_2iot2b/view?usp=drive_link"
+
 model.load_weights(weights_path)
 model.compile(optimizer=tf.keras.optimizers.Adam(LR), loss='categorical_crossentropy', metrics=[sm.metrics.iou_score])
 
